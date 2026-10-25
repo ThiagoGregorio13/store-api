@@ -28,4 +28,16 @@ app.get("/products/:id", (c) => {
   return c.json(product);
 });
 
+app.post("/products", async (c) => {
+  const body = await c.req.json();
+  const newProduct = {
+    id: products.length + 1,
+    title: body.title,
+    price: body.price,
+    category: body.category,
+  };
+  products.push(newProduct);
+  return c.json(newProduct, 201);
+});
+
 export default app;
