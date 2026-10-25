@@ -30,6 +30,12 @@ app.get("/products/:id", (c) => {
 
 app.post("/products", async (c) => {
   const body = await c.req.json();
+  if(typeof body.title !== "string" || typeof body.price !== "number" || typeof body.category !== "string" || body.title.trim() === ""){
+    return c.json({message: "Invalid input"}, 400);
+  }
+  if(typeof body.price !== "number" || body.price <= 0 ){
+    return c.json({message: "Price must be a positive number"}, 400);
+  }
   const newProduct = {
     id: products.length + 1,
     title: body.title,
