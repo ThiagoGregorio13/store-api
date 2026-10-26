@@ -38,6 +38,8 @@ app.post("/products", async (c) => {
     return c.json({ message: "Body must be valid JSON" }, 400);
   }
   if (
+    body === null ||
+    typeof body !== "object" ||
     typeof body.title !== "string" ||
     typeof body.price !== "number" ||
     typeof body.category !== "string" ||
