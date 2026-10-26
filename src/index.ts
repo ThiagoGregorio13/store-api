@@ -3,7 +3,12 @@ import { sql } from "bun";
 
 const app = new Hono();
 
-type ProductRow = { id: number; title: string; price: string; category: string };
+type ProductRow = {
+  id: number;
+  title: string;
+  price: string;
+  category: string;
+};
 
 const products = [
   { id: 1, title: "product 1", price: 10, category: "smartphones" },
@@ -18,12 +23,11 @@ app.get("/products", async (c) => {
     const mapRows = rows.map((p) => ({ ...p, price: Number(p.price) }));
     return c.json(mapRows);
   }
-  const filtered = products.filter(
-    (p) => p.category.toLocaleLowerCase() === category.toLocaleLowerCase(),
-  );
-  return c.json(filtered);
+  const filtered: ProductRow[] =
+    await sql`SELECT * FROM products WHERE LOWER(category) = LOWER(${category})`;
+  const mapFiltered = filtered.map((p) => ({ ...p, price: Number(p.price) }));
+  return c.json(mapFiltered);
 });
-
 
 app.get("/products/:id", (c) => {
   const id = c.req.param("id");
