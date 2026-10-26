@@ -10,12 +10,6 @@ type ProductRow = {
   category: string;
 };
 
-const products = [
-  { id: 1, title: "product 1", price: 10, category: "smartphones" },
-  { id: 2, title: "product 2", price: 20, category: "smartphones" },
-  { id: 3, title: "product 3", price: 30, category: "laptops" },
-];
-
 app.get("/products", async (c) => {
   const category = c.req.query("category");
   if (!category) {
