@@ -29,15 +29,18 @@ app.get("/products", async (c) => {
   return c.json(mapFiltered);
 });
 
-app.get("/products/:id", (c) => {
-  const id = c.req.param("id");
-  const product = products.find((p) => p.id === Number(id));
-
+app.get("/products/:id", async (c) => {
+  const id = Number(c.req.param("id"));
+  if(!Number.isInteger(id)){
+    return c.json({message:"id must be an integer"}, 400)
+  }
+  const rows: ProductRow[] = await sql`SELECT * FROM products WHERE id = ${id}`;
+  const product = rows[0];
   if (!product) {
-    return c.json({ message: "Product not found" }, 404);
+    return c.json({ message: `Product with id ${id} not found` }, 404);
   }
 
-  return c.json(product);
+  return c.json({ ...product, price: Number(product.price) });
 });
 
 app.post("/products", async (c) => {
