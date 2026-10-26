@@ -1,6 +1,9 @@
 import { Hono } from "hono";
+import { sql } from "bun";
 
 const app = new Hono();
+
+type ProductRow = { id: number; title: string; price: string; category: string };
 
 const products = [
   { id: 1, title: "product 1", price: 10, category: "smartphones" },
@@ -8,16 +11,19 @@ const products = [
   { id: 3, title: "product 3", price: 30, category: "laptops" },
 ];
 
-app.get("/products", (c) => {
+app.get("/products", async (c) => {
   const category = c.req.query("category");
   if (!category) {
-    return c.json(products);
+    const rows: ProductRow[] = await sql`SELECT * FROM products`;
+    const mapRows = rows.map((p) => ({ ...p, price: Number(p.price) }));
+    return c.json(mapRows);
   }
   const filtered = products.filter(
     (p) => p.category.toLocaleLowerCase() === category.toLocaleLowerCase(),
   );
   return c.json(filtered);
 });
+
 
 app.get("/products/:id", (c) => {
   const id = c.req.param("id");
