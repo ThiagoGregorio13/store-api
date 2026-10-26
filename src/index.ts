@@ -60,17 +60,18 @@ app.post("/products", async (c) => {
   ) {
     return c.json({ message: "Invalid input" }, 400);
   }
-  if (typeof body.price !== "number" || body.price <= 0) {
+  if (body.price <= 0) {
     return c.json({ message: "Price must be a positive number" }, 400);
   }
-  const newProduct = {
-    id: products.length + 1,
-    title: body.title,
-    price: body.price,
-    category: body.category,
-  };
-  products.push(newProduct);
-  return c.json(newProduct, 201);
+
+  const rows: ProductRow[] = await sql`
+    INSERT INTO products (title, price, category)
+    VALUES (${body.title.trim()}, ${body.price}, ${body.category})
+    RETURNING *
+  `;
+  const newProduct = rows[0];
+
+  return c.json({ ...newProduct, price: Number(newProduct.price) }, 201);
 });
 
 export default app;
