@@ -10,23 +10,25 @@ type ProductRow = {
   category: string;
 };
 
+function toProduct(row: ProductRow) {
+  return { ...row, price: Number(row.price) };
+}
+
 app.get("/products", async (c) => {
   const category = c.req.query("category");
   if (!category) {
     const rows: ProductRow[] = await sql`SELECT * FROM products`;
-    const mapRows = rows.map((p) => ({ ...p, price: Number(p.price) }));
-    return c.json(mapRows);
+    return c.json(rows.map(toProduct));
   }
   const filtered: ProductRow[] =
     await sql`SELECT * FROM products WHERE LOWER(category) = LOWER(${category})`;
-  const mapFiltered = filtered.map((p) => ({ ...p, price: Number(p.price) }));
-  return c.json(mapFiltered);
+  return c.json(filtered.map(toProduct));
 });
 
 app.get("/products/:id", async (c) => {
   const id = Number(c.req.param("id"));
-  if(!Number.isInteger(id)){
-    return c.json({message:"id must be an integer"}, 400)
+  if (!Number.isInteger(id)) {
+    return c.json({ message: "id must be an integer" }, 400);
   }
   const rows: ProductRow[] = await sql`SELECT * FROM products WHERE id = ${id}`;
   const product = rows[0];
@@ -34,7 +36,7 @@ app.get("/products/:id", async (c) => {
     return c.json({ message: `Product with id ${id} not found` }, 404);
   }
 
-  return c.json({ ...product, price: Number(product.price) });
+  return c.json(toProduct(product));
 });
 
 app.post("/products", async (c) => {
@@ -65,7 +67,7 @@ app.post("/products", async (c) => {
   `;
   const newProduct = rows[0];
 
-  return c.json({ ...newProduct, price: Number(newProduct.price) }, 201);
+  return c.json(toProduct(newProduct), 201);
 });
 
 export default app;
